@@ -3,16 +3,16 @@ import * as utils from './index';
 const data = { a: '1', b: '2', c: '3' };
 
 describe('Helper Functions', () => {
-  test('pending(): build an action string for a pending action', () => {
-    expect(utils.pending('actionname')).toBe('actionname.pending');
+  test('typePending(): build an action string for a pending action', () => {
+    expect(utils.typePending('actionname')).toBe('actionname.pending');
   });
 
-  test('ok(): build an action string for a ok action', () => {
-    expect(utils.ok('actionname')).toBe('actionname.ok');
+  test('typeOK(): build an action string for a ok action', () => {
+    expect(utils.typeOK('actionname')).toBe('actionname.ok');
   });
 
-  test('fail(): build an action string for a fail action', () => {
-    expect(utils.fail('actionname')).toBe('actionname.fail');
+  test('typeFail(): build an action string for a fail action', () => {
+    expect(utils.typeFail('actionname')).toBe('actionname.fail');
   });
 
   test('Payload(): wrap a provided object as an action payload', () => {
@@ -46,6 +46,42 @@ describe('Action Builders', () => {
       payload: { ...data },
     });
   });
+
+  describe('ActionAsync()', () => {
+    let handler;
+    let dispatchSpy;
+    let asyncAction;
+    beforeEach(() => {
+      handler = jest.fn();
+      dispatchSpy = jest.fn();
+      asyncAction = utils.ActionAsync('action', handler, 'a', 'b', 'c');
+    });
+
+    test('will immediately dispatch a pending action', () => {
+      asyncAction(dispatchSpy).catch(() => {});
+      expect(dispatchSpy.mock.calls[0][0]).toEqual({ type: 'action.pending', payload: {} });
+    });
+
+    test('will invoke the handler with the provided parameters', () => {
+      asyncAction(dispatchSpy).catch(() => {});
+      expect(handler.mock.calls[0][0]).toEqual('a');
+      expect(handler.mock.calls[0][1]).toEqual('b');
+      expect(handler.mock.calls[0][2]).toEqual('c');
+    });
+
+    test('will dispatch an OK action on async success', async () => {
+      handler.mockReturnValue(Promise.resolve({ ok: true, payload: data }));
+      await asyncAction(dispatchSpy).catch(() => {});
+      expect(dispatchSpy.mock.calls[1][0]).toEqual({ type: 'action.ok', payload: data });
+    });
+
+    test('will dispatch a FAIL action on async failure', async () => {
+      const error = { code: 'details' };
+      handler.mockReturnValue(Promise.resolve({ ok: false, payload: data, error }));
+      await asyncAction(dispatchSpy).catch(() => {});
+      expect(dispatchSpy.mock.calls[1][0]).toEqual({ type: 'action.fail', payload: error });
+    });
+  });
 });
 
 describe('Reducer Helpers', () => {
@@ -73,12 +109,12 @@ describe('Reducer Helpers', () => {
 
   test('ReducerFail(): set isLoading to false, hasError to true, destructure payload', () => {
     const state = { a: '1', isLoading: true };
-    const action = { type: 'action', payload: { code: 'errorCode' } };
+    const action = { type: 'action', payload: { error: 'errorDetails' } };
     expect(utils.ReducerFail(state, action)).toEqual({
       a: '1',
       isLoading: false,
       hasError: true,
-      errorCode: 'errorCode',
+      errorDetail: 'errorDetails',
     });
   });
 });
@@ -141,5 +177,104 @@ describe('Reducer Handler Map', () => {
     expect(action1.mock.calls).toHaveLength(0);
     expect(action2.mock.calls).toHaveLength(0);
     expect(result).toEqual(initialState);
+  });
+
+  describe('ReducerAsync()', () => {
+    let reducer;
+    const state = { };
+    beforeEach(() => {
+      reducer = utils.createReducer(state, utils.ReducerAsync('action'));
+    });
+
+    test('properly maps the pending action to the ReducerPending handler', () => {
+      const pendingAction = { type: 'action.pending', payload: data };
+      expect(reducer(state, pendingAction)).toEqual({
+        ...data,
+        isLoading: true,
+        hasError: false,
+      });
+    });
+
+    test('properly maps the ok action to the ReducerOK handler', () => {
+      const okAction = { type: 'action.ok', payload: data };
+      expect(reducer(state, okAction)).toEqual({
+        ...data,
+        isLoading: false,
+        hasError: false,
+      });
+    });
+
+    test('properly maps the fail action to the ReducerFail handler', () => {
+      const failAction = { type: 'action.fail', payload: { error: 'detail' } };
+      expect(reducer(state, failAction)).toEqual({
+        errorDetail: 'detail',
+        isLoading: false,
+        hasError: true,
+      });
+    });
+  });
+
+  describe('ReducerAsyncActions()', () => {
+    const testActions = ['action1', 'action2', 'action3'];
+    let reducer;
+    const state = { };
+    beforeEach(() => {
+      reducer = utils.createReducer(state, utils.ReducerAsyncActions(testActions));
+    });
+
+    testActions.forEach((action) => {
+      test(`properly maps the pending action to the ReducerPending handler: ${action}`, () => {
+        const pendingAction = { type: `${action}.pending`, payload: data };
+        expect(reducer(state, pendingAction)).toEqual({
+          ...data,
+          isLoading: true,
+          hasError: false,
+        });
+      });
+      test(`properly maps the ok action to the ReducerOK handler: ${action}`, () => {
+        const okAction = { type: `${action}.ok`, payload: data };
+        expect(reducer(state, okAction)).toEqual({
+          ...data,
+          isLoading: false,
+          hasError: false,
+        });
+      });
+      test(`properly maps the fail action to the ReducerFail handler: ${action}`, () => {
+        const failAction = { type: `${action}.fail`, payload: { error: 'detail' } };
+        expect(reducer(state, failAction)).toEqual({
+          errorDetail: 'detail',
+          isLoading: false,
+          hasError: true,
+        });
+      });
+    });
+  });
+});
+
+describe('asyncInvoke()', () => {
+  let asyncFuncSpy;
+  beforeEach(() => {
+    asyncFuncSpy = jest.fn();
+  });
+
+  test('should invoke the async func with the given params', () => {
+    utils.asyncInvoke(asyncFuncSpy, 'a', 'b', 'c');
+    expect(asyncFuncSpy.mock.calls).toHaveLength(1);
+    expect(asyncFuncSpy.mock.calls[0][0]).toBe('a');
+    expect(asyncFuncSpy.mock.calls[0][1]).toBe('b');
+    expect(asyncFuncSpy.mock.calls[0][2]).toBe('c');
+  });
+
+  test('should return an OK response on success of the async function', async () => {
+    asyncFuncSpy.mockReturnValue(Promise.resolve(data));
+    const result = await utils.asyncInvoke(asyncFuncSpy, 'a', 'b', 'c');
+    expect(result).toEqual({ ok: true, data });
+  });
+
+  test('should return a fail response on success of the async function', async () => {
+    const error = { code: 'error1' };
+    asyncFuncSpy.mockReturnValue(Promise.reject(error));
+    const result = await utils.asyncInvoke(asyncFuncSpy, 'a', 'b', 'c');
+    expect(result).toEqual({ ok: false, error });
   });
 });
