@@ -48,13 +48,13 @@ const handlerReducer = (handlers, type) => ({ ...handlers, ...ReducerAsync(type)
 export const ReducerAsyncActions = actions => actions.reduce(handlerReducer, {});
 
 // reducer map creator
-export const invokeHandler = (action, map, state) => {
+export const callHandler = (action, map, state) => {
   const { type } = action || {};
   const handler = type ? map[type] : undefined;
   return handler ? handler(state, action) : state;
 };
-export function createReducer(initialState, handlerMap) {
-  return (state = initialState, action) => invokeHandler(action, handlerMap, state);
+export function createReducer(initState, handlerMap) {
+  return (state = initState, action) => callHandler(action, handlerMap, state);
 }
 
 // async invoke with ok/error/payload response
