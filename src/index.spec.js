@@ -91,6 +91,7 @@ describe('Reducer Helpers', () => {
     expect(utils.ReducerPending(state, action)).toEqual({
       a: '1',
       b: '2',
+      errorDetail: null,
       isLoading: true,
       hasError: false,
     });
@@ -102,6 +103,7 @@ describe('Reducer Helpers', () => {
     expect(utils.ReducerOK(state, action)).toEqual({
       a: '1',
       b: '2',
+      errorDetail: null,
       isLoading: false,
       hasError: false,
     });
@@ -112,9 +114,9 @@ describe('Reducer Helpers', () => {
     const action = { type: 'action', payload: { error: 'errorDetails' } };
     expect(utils.ReducerFail(state, action)).toEqual({
       a: '1',
+      errorDetail: 'errorDetails',
       isLoading: false,
       hasError: true,
-      errorDetail: 'errorDetails',
     });
   });
 });
@@ -190,6 +192,7 @@ describe('Reducer Handler Map', () => {
       const pendingAction = { type: 'action.pending', payload: data };
       expect(reducer(state, pendingAction)).toEqual({
         ...data,
+        errorDetail: null,
         isLoading: true,
         hasError: false,
       });
@@ -199,6 +202,7 @@ describe('Reducer Handler Map', () => {
       const okAction = { type: 'action.ok', payload: data };
       expect(reducer(state, okAction)).toEqual({
         ...data,
+        errorDetail: null,
         isLoading: false,
         hasError: false,
       });
@@ -227,6 +231,7 @@ describe('Reducer Handler Map', () => {
         const pendingAction = { type: `${action}.pending`, payload: data };
         expect(reducer(state, pendingAction)).toEqual({
           ...data,
+          errorDetail: null,
           isLoading: true,
           hasError: false,
         });
@@ -235,6 +240,7 @@ describe('Reducer Handler Map', () => {
         const okAction = { type: `${action}.ok`, payload: data };
         expect(reducer(state, okAction)).toEqual({
           ...data,
+          errorDetail: null,
           isLoading: false,
           hasError: false,
         });

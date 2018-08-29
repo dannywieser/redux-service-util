@@ -1,4 +1,5 @@
 // pending/ok/fail type state helpers
+/* eslint-disable max-len */
 export const PENDING = 'pending';
 export const OK = 'ok';
 export const FAIL = 'fail';
@@ -27,15 +28,14 @@ export const ActionAsync = (type, handler, ...params) => async (dispatch) => {
 };
 
 // reducer core handlers
-export const baseState = (isLoading = false, hasError = false) => ({ isLoading, hasError });
+export const baseState = (isLoading = false, hasError = false, errorDetail = null) => ({ isLoading, hasError, errorDetail });
 export const ReducerPending = (state, data) => ({ ...state, ...data.payload, ...baseState(true) });
 export const ReducerOK = (state, data) => ({ ...state, ...data.payload, ...baseState() });
 export const ReducerFail = (state, data) => {
   const { error } = data.payload;
   return {
     ...state,
-    ...baseState(false, true),
-    errorDetail: error,
+    ...baseState(false, true, error),
   };
 };
 // create a reducer combining pending/ok/fail handlers
