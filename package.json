@@ -6,6 +6,9 @@
   "repository": "git@github.com:danny-wieser/redux-service-util.git",
   "author": "danny.wieser@gmail.com",
   "license": "MIT",
+  "files": [
+    "dist/**/*.*"
+  ],
   "scripts": {
     "build": "yarn run clean && babel src --out-dir dist --ignore '**/*.spec.js'",
     "clean": "rimraf dist coverage yarn-error.log",
