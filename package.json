@@ -2,7 +2,7 @@
   "name": "redux-service-util",
   "version": "1.0.3",
   "description": "Utilities for building Redux data services",
-  "main": "index.js",
+  "main": "dist/index.js",
   "repository": "git@github.com:danny-wieser/redux-service-util.git",
   "author": "danny.wieser@gmail.com",
   "license": "MIT",
