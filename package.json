@@ -1,6 +1,6 @@
 {
   "name": "redux-service-util",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Utilities for building Redux data services",
   "main": "dist/index.js",
   "repository": "git@github.com:danny-wieser/redux-service-util.git",
