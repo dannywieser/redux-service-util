@@ -23,25 +23,25 @@ This library includes the following functions for reducing boilerplate in the sc
 
 ### action creators
 
-***ActionPending(type, data)***: Given an action type and a payload, return an Action of `actionname.pending`, with the data wrapped with the name `payload`
+```ActionPending(type, data)```: Given an action type and a payload, return an Action of `actionname.pending`, with the data wrapped with the name `payload`
 
 ```js
   { type: 'action.pending', payload: { ... somedata } }
 ```
 
-***ActionOK(type, data)***: Given an action type and a payload, return an Action of `actionname.ok`, with the data wrapped with the name `payload`
+```ActionOK(type, data)```: Given an action type and a payload, return an Action of `actionname.ok`, with the data wrapped with the name `payload`
 
 ```js
   { type: 'action.ok', payload: { ... somedata } }
 ```
 
-***ActionFail(type, error)***: Given an action type and a payload, return an Action of `actionname.fail`, with the data wrapped with the name `payload`
+```ActionFail(type, error)```: Given an action type and a payload, return an Action of `actionname.fail`, with the data wrapped with the name `payload`
 
 ```js
   { type: 'action.fail', payload: { ... error } }
 ```
 
-***ActionAsync(type, handlerFunction, params)***: Combines the above 3 functions into a single call. Given an action type, the async handler function to retrieve the data for that type, and the necessary params, will:
+```ActionAsync(type, handlerFunction, params)```: Combines the above 3 functions into a single call. Given an action type, the async handler function to retrieve the data for that type, and the necessary params, will:
 * dispatch the pending action immediately
 * invoke the handler function with the provided parameters
 * dispatch an OK action on success, with the data from the API wrapped in  `payload`
@@ -49,25 +49,25 @@ This library includes the following functions for reducing boilerplate in the sc
 
 ### reducer helpers
 
-***ReducerPending(state, action)***: A reducer handler function that will:
+```ReducerPending(state, action)```: A reducer handler function that will:
 * set isLoading to true in state
 * deconstruct any `payload` included in the action to become part of the state
 
-***ReducerOK(state, action)***: A reducer handler function that will:
+```ReducerOK(state, action)```: A reducer handler function that will:
 * set isLoading to false in state
 * set hasError to false
 * deconstruct any `payload` included in the action to become part of the state
 
-***ReducerFail(state, action)***: A reducer handler function that will:
+```ReducerFail(state, action)```: A reducer handler function that will:
 * set isLoading to false in state
 * set hasError to true
 * retrieve a payload property of `error` and set that value in the state
 
-***ReducerAsync(type)***: A single function to map the 3 handlers noted above to an action type.  
+```ReducerAsync(type)```: A single function to map the 3 handlers noted above to an action type.  
 
-***ReducerAsyncActions(types[])***: A single function to map the pending/ok/fail states to a provided array of action types
+```ReducerAsyncActions(types[])```: A single function to map the pending/ok/fail states to a provided array of action types
 
-***createReducer(initialState, handlerMap)***: helper function to create a reducer based on a map of actions to handler functions.  
+```createReducer(initialState, handlerMap)```: helper function to create a reducer based on a map of actions to handler functions.  
 
 ```js
 createReducer({},
@@ -85,7 +85,7 @@ createReducer({}, ReducerAsyncActions(['action1', 'action2', 'action3']));
 
 ### Other helpers
 
-***asyncInvoke(asyncFunc, ...params)***: given an asynchronous function and the parameters required to invoke that function, will invoke the function in a try catch, returning the result in a format of:
+```asyncInvoke(asyncFunc, ...params)```: given an asynchronous function and the parameters required to invoke that function, will invoke the function in a try catch, returning the result in a format of:
 
 **success**
 
