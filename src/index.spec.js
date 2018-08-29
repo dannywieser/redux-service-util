@@ -1,6 +1,7 @@
 import * as utils from './index';
 
 const data = { a: '1', b: '2', c: '3' };
+const error = { code: 'errorCode' };
 
 describe('Helper Functions', () => {
   test('typePending(): build an action string for a pending action', () => {
@@ -41,9 +42,9 @@ describe('Action Builders', () => {
   });
 
   test('ActionFail(): create a failed action given a type and payload', () => {
-    expect(utils.ActionFail('action', data)).toEqual({
+    expect(utils.ActionFail('action', error)).toEqual({
       type: 'action.fail',
-      payload: { ...data },
+      payload: { error: { ...error } },
     });
   });
 
@@ -76,10 +77,9 @@ describe('Action Builders', () => {
     });
 
     test('will dispatch a FAIL action on async failure', async () => {
-      const error = { code: 'details' };
       handler.mockReturnValue(Promise.resolve({ ok: false, payload: data, error }));
       await asyncAction(dispatchSpy).catch(() => {});
-      expect(dispatchSpy.mock.calls[1][0]).toEqual({ type: 'action.fail', payload: error });
+      expect(dispatchSpy.mock.calls[1][0]).toEqual({ type: 'action.fail', payload: { error } });
     });
   });
 });
@@ -272,7 +272,6 @@ describe('asyncInvoke()', () => {
   });
 
   test('should return a fail response on success of the async function', async () => {
-    const error = { code: 'error1' };
     asyncFuncSpy.mockReturnValue(Promise.reject(error));
     const result = await utils.asyncInvoke(asyncFuncSpy, 'a', 'b', 'c');
     expect(result).toEqual({ ok: false, error });

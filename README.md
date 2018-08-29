@@ -18,6 +18,9 @@ A typical **action creator** for the scenario described above would accept the p
 
 A typical **reducer** in this scenario would set a loading flag to true/false, an error flag to true/false, or populate the state with a payload of data retrieved via the API.
 
+## installation
+
+`yarn install redux-service-util`
 
 ## functions
 
@@ -40,7 +43,7 @@ This library includes the following functions for reducing boilerplate in the sc
 ```ActionFail(type, error)```: Given an action type and a payload, return an Action of `actionname.fail`, with the data wrapped with the name `payload`
 
 ```js
-  { type: 'action.fail', payload: { ... error } }
+  { type: 'action.fail', payload: { error: ...errorDetails } }
 ```
 
 ```ActionAsync(type, handlerFunction, params)```: Combines the above 3 functions into a single call. Given an action type, the async handler function to retrieve the data for that type, and the necessary params, will:

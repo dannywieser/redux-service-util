@@ -16,7 +16,7 @@ export const Action = (type, data) => ({ type, ...data });
 export const ActionSync = (type, payload) => Action(type, Payload(payload));
 export const ActionPending = (type, payload) => Action(typePending(type), Payload(payload));
 export const ActionOK = (type, payload) => Action(typeOK(type), Payload(payload));
-export const ActionFail = (type, error) => Action(typeFail(type), Payload(error));
+export const ActionFail = (type, error) => Action(typeFail(type), Payload({ error }));
 // async action builder: create an action combining pending/ok/fail states
 // parameters: type, handler function and params
 export const ActionAsync = (type, handler, ...params) => async (dispatch) => {
