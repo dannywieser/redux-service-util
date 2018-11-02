@@ -1,7 +1,7 @@
 # redux-service-util
 [![Build Status](https://travis-ci.org/danny-wieser/redux-service-util.svg?branch=master)](https://travis-ci.org/danny-wieser/redux-service-util)
 
-Utilities and helpers for creating Redux data services
+Utilities and helpers for creating Redux Data Services
 
 ## overview
 
@@ -20,7 +20,7 @@ A typical **reducer** in this scenario would set a loading flag to true/false, a
 
 ## installation
 
-`yarn install redux-service-util`
+`yarn add redux-service-util`
 
 ## functions
 
@@ -28,49 +28,63 @@ This library includes the following functions for reducing boilerplate in the sc
 
 ### action creators
 
-```ActionPending(type, data)```: Given an action type and a payload, return an Action of `actionname.pending`, with the data wrapped with the name `payload`
+```actionPending(type, data)```: Given an action type and a payload, return an Action of `actionname.pending`, with the data wrapped with the name `payload`
 
 ```js
   { type: 'action.pending', payload: { ... somedata } }
 ```
 
-```ActionOK(type, data)```: Given an action type and a payload, return an Action of `actionname.ok`, with the data wrapped with the name `payload`
+```actionOK(type, data)```: Given an action type and a payload, return an Action of `actionname.ok`, with the data wrapped with the name `payload`
 
 ```js
   { type: 'action.ok', payload: { ... somedata } }
 ```
 
-```ActionFail(type, error)```: Given an action type and a payload, return an Action of `actionname.fail`, with the data wrapped with the name `payload`
+```actionFail(type, error)```: Given an action type and a payload, return an Action of `actionname.fail`, with the data wrapped with the name `payload`
 
 ```js
   { type: 'action.fail', payload: { error: ...errorDetails } }
 ```
 
-```ActionAsync(type, handlerFunction, params)```: Combines the above 3 functions into a single call. Given an action type, the async handler function to retrieve the data for that type, and the necessary params, will:
+Where errorDetails is of type `IErrorDetails`, containing the status code and the error response body as 'data'
+
+```actionAsync(opts: IAsyncActionOpts, ...params: any[])```: Combines the above 3 functions into a single call. Given an action type, the async handler function to retrieve the data for that type, and the necessary params, will:
 * dispatch the pending action immediately
 * invoke the handler function with the provided parameters
 * dispatch an OK action on success, with the data from the API wrapped in  `payload`
 * dispatch a FAIL action on error, with the error details wrapped in `payload`
 
+The IAsyncActionOpts options object consists of the following properties:
+type: (required) - the action type being invoked
+handler: (required) - the async handler to be invoked for the action
+fetched: (optional) - if set to true, will set the "fetched" flag in the API state. This is used to indicate to the UI that an initial list request has been made to the API
+updating: (optional) - set either to "new" or an item ID that is being updated by the action, to allow for the UI to isolate which item is being updated by an async API action.
+
 ### reducer helpers
 
-```ReducerPending(state, action)```: A reducer handler function that will:
-* set isLoading to true in state
+```reducerPending(state, action)```: A reducer handler function that will:
+* set pending to true in state
 * deconstruct any `payload` included in the action to become part of the state
 
-```ReducerOK(state, action)```: A reducer handler function that will:
-* set isLoading to false in state
-* set hasError to false
+```reducerOK(state, action)```: A reducer handler function that will:
+* set pending to false in state
+* set ok to true
 * deconstruct any `payload` included in the action to become part of the state
 
-```ReducerFail(state, action)```: A reducer handler function that will:
-* set isLoading to false in state
-* set hasError to true
+```reducerFail(state, action)```: A reducer handler function that will:
+* set pending to false in state
+* set ok to false
 * retrieve a payload property of `error` and set that value in the state
 
-```ReducerAsync(type)```: A single function to map the 3 handlers noted above to an action type.  
+```reducerAsync(type)```: A single function to map the 3 handlers noted above to an action type.  
 
-```ReducerAsyncActions(types[])```: A single function to map the pending/ok/fail states to a provided array of action types
+```reducerAsyncActions(types[], overrides?)```: A single function to map the pending/ok/fail states to a provided array of action types. If a particular action or actions needs an override from the default handler, an map object can be provided with just the override handlers.  
+
+Example:
+
+```js
+{ [typeOK('actionname')]: (state: IBaseState, action: IAction) => customHandler(state, action) }
+```
 
 ```createReducer(initialState, handlerMap)```: helper function to create a reducer based on a map of actions to handler functions.  
 
@@ -82,22 +96,37 @@ createReducer({},
   });
 ```
 
-Can be used in conjunction with `ReducerAsync` or `ReducerAsyncActions` to create a reducer that handles pending/fail/ok states for a large set of action types.
+Can be used in conjunction with `reducerAsync` or `reducerAsyncActions` to create a reducer that handles pending/fail/ok states for a large set of action types.
 
 ```js
-createReducer({}, ReducerAsyncActions(['action1', 'action2', 'action3']));
+createReducer({}, reducerAsyncActions(['action1', 'action2', 'action3']));
 ```
 
-### Other helpers
+### selector helpers
 
-```asyncInvoke(asyncFunc, ...params)```: given an asynchronous function and the parameters required to invoke that function, will invoke the function in a try catch, returning the result in a format of:
+```apiOnly(state)```: returns only the api property of IBaseState
+```withoutApi(state)```: returns IBaseState with the api property removed
+```asValues(state)```: assuming a state consisting of a key-value map, will remove the API section and return the map of values as an array.
+
+### http/fetch helpers
+
+`doFetch(path)`
+
+`doPost(path, body)`
+
+`doPatch(path, body)`
+
+`doDelete(path)`
+
+These helper functions will perform these basic HTTP operations given a path and body and return a standardized object response with properties of `ok`, `data`, and `status`
 
 **success**
 
 ```js
   {
     ok: true,
-    data: { /* response from async call */ }
+    data: { /* response body */ },
+    status: 200
   }
 ```
 **failure**
@@ -105,7 +134,8 @@ createReducer({}, ReducerAsyncActions(['action1', 'action2', 'action3']));
 ```js
   {
     ok: false,
-    error: { /* error from async call */ }
+    data: { /* response body */ }
+    status: 4xx or 5xx or 0
   }
 ```
 
@@ -124,7 +154,7 @@ Given an application for managing todos, an API call might be made to retrieve a
 
 A redux action defined to retrieve todos could be defined as `fetch_todos`
 
-When that action is invoked, a "pending" action will be dispatched of `fetch_todos.pending`, state will be updated with a loading flag
+When that action is invoked, a "pending" action will be dispatched of `fetch_todos.pending`, state will be updated with a pending flag
 
 A `todos` service module is defined that has an exported function of `fetchTodos`.  When invoked, this function will do a GET to a REST API /todos and wait for the response
 

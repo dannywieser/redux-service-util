@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "es2017"
+    ],
+    "module": "es2015",
+    "moduleResolution": "node",
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "pretty": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "jsx": "react",
+    "outDir": "dist",
+    "esModuleInterop": true
+  },
+  "compileOnSave": false,
+  "include": ["src/**/*.ts"]
+}
