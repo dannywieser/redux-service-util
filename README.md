@@ -1,6 +1,5 @@
 # redux-service-util
-
-https://travis-ci.org/dannywieser/redux-service-util.svg?branch=master
+[![Build Status](https://travis-ci.org/dannywieser/redux-service-util.svg?branch=master)](https://travis-ci.org/dannywieser/redux-service-util)
 
 Utilities and helpers for creating Redux Data Services
 
